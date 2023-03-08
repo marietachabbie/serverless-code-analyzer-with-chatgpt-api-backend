@@ -1,0 +1,9 @@
+# dependencies
+node_modules
+package-lock.json
+
+# serverless directories
+.serverless
+
+# environment variables
+env.yml

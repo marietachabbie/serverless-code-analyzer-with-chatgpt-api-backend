@@ -1,0 +1,23 @@
+service: code-analyzer
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${self:provider.environment.AWS_DEFAULT_REGION}
+  stage: dev
+  environment: ${file(env.yml):${self:provider.stage}}
+
+functions:
+  greet:
+    handler: handler.greet
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - httpApi:
+          path: /hello
+          method: post

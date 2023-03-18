@@ -1,4 +1,5 @@
 const configLoader = require('node-yaml-config');
+const fs = require('fs');
 
 module.exports.setupEnvironment = (env) => {
     const content = configLoader.load('./backend/env.yml', env);
@@ -22,4 +23,13 @@ module.exports.httpResponse = (code, message) => {
         statusCode: code,
         body: JSON.stringify(message),
     };
+};
+
+module.exports.readFromFile = async (path) => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(path, (err, data) => {
+            if (err) { reject(err); }
+            resolve(JSON.parse(data));
+        });
+    });
 };

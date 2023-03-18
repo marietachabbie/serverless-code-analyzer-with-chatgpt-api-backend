@@ -9,11 +9,16 @@ class CodeAnalyzer {
             return Utils.httpResponse(200, null);
         }
 
-        const question = '';
+        const question = this.generateQuestion(code);
         const response = await this.requestDataFromChatgptAPI(question);
 
         const data = await this.analyseResponseMessage(response);
         return Utils.httpResponse(200, data);
+    }
+
+    static generateQuestion(code) {
+        const question = `Tell me ${MessageConstants.TOPICS_AMOUNT} things about this code: ${MessageConstants.TOPICS.join(',')}`;
+        return question + '\n' + code;
     }
 
     static async analyseResponseMessage (message) {
@@ -36,26 +41,26 @@ class CodeAnalyzer {
     static async assignLanguageVersionExplanation (result, orderedArray) {
         const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
 
-        result.language_details = orderedArray[MessageConstants.LANGUAGE_INDEX];
-        result.version_details = orderedArray[MessageConstants.VERSION_INDEX];
-        result.analyse = orderedArray[MessageConstants.ANALYSE_INDEX];
+        result[MessageConstants.LANGUAGE_DETAILS] = orderedArray[MessageConstants.LANGUAGE_INDEX];
+        result[MessageConstants.VERSION_DETAILS] = orderedArray[MessageConstants.VERSION_INDEX];
+        result[MessageConstants.ANALYSE] = orderedArray[MessageConstants.ANALYSE_INDEX];
 
-        const language = result.language_details.split(' ');
+        const language = result[MessageConstants.LANGUAGE_DETAILS].split(' ');
         language.forEach((word, idx) => {
             if (idx !== 0 && /^[A-Z]/.test(word)) {
-                result.language = word.replace(punctuationRegex, '');
+                result[MessageConstants.LANGUAGE] = word.replace(punctuationRegex, '');
             }
         });
 
-        const version = result.version_details.split(' ');
+        const version = result[MessageConstants.VERSION_DETAILS].split(' ');
         version.forEach((word) => {
             if (/\d/.test(word)) {
-                result.version = word.replace(punctuationRegex, '');
+                result[MessageConstants.VERSION] = word.replace(punctuationRegex, '');
             }
         });
 
-        if (!result.version) {
-            result.version = 'Not specified';
+        if (!result[MessageConstants.VERSION]) {
+            result[MessageConstants.VERSION] = 'Not specified';
         }
     }
 
@@ -63,20 +68,22 @@ class CodeAnalyzer {
         const complexityPunctuationRegex = /[!"#$%&'*+,-.:;<=>?@[\]_`{|}~]/g;
         const complexityRegex = /^O\(.*\)$/i;
 
-        result.time_complexity_details = orderedArray[MessageConstants.TIME_COMPLEXITY_INDEX];
-        result.space_complexity_details = orderedArray[MessageConstants.SPACE_COMPLEXITY_INDEX];
+        result[MessageConstants.TIME_COMPLEXITY_DETAILS] =
+            orderedArray[MessageConstants.TIME_COMPLEXITY_INDEX];
+        result[MessageConstants.SPACE_COMPLEXITY_DETAILS] =
+            orderedArray[MessageConstants.SPACE_COMPLEXITY_INDEX];
 
-        const tcomplexity = result.time_complexity_details.split(' ');
+        const tcomplexity = result[MessageConstants.TIME_COMPLEXITY_DETAILS].split(' ');
         tcomplexity.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                result.time_complexity = word.replace(complexityPunctuationRegex, '');
+                result[MessageConstants.TIME_COMPLEXITY] = word.replace(complexityPunctuationRegex, '');
             }
         });
 
-        const scomplexity = result.space_complexity_details.split(' ');
+        const scomplexity = result[MessageConstants.SPACE_COMPLEXITY_DETAILS].split(' ');
         scomplexity.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                result.space_complexity = word.replace(complexityPunctuationRegex, '');
+                result[MessageConstants.SPACE_COMPLEXITY] = word.replace(complexityPunctuationRegex, '');
             }
         });
     }

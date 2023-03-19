@@ -62,15 +62,20 @@ class CodeAnalyzer {
 
         const complexityPunctuationRegex = /[!"#$%&'*,.:;<=>?@[\]_`{|}~]$/g;
         const complexityRegex = /^O\(.*\)$/i;
+        let isConstant = false;
 
         const splitted = this.processedResult[`${complexity}_${MessageConstants.DETAILS}`].split(' ');
         splitted.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
                 this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '');
+            } else if (word === 'constant') {
+                isConstant = true;
             }
         });
 
-        // if no complexity found and word constant was found set complexity to O(1)
+        if (!this.processedResult[`${complexity}`] && isConstant) {
+            this.processedResult[`${complexity}`] = 'O(1)';
+        }
     }
 
     static async requestDataFromChatgptAPI (content) {

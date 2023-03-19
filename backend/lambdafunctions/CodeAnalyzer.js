@@ -21,7 +21,7 @@ class CodeAnalyzer {
         return question + '\n' + code;
     }
 
-    static async analyseResponseMessage (message) {
+    static analyseResponseMessage (message) {
         this.orderedArray = [];
         const splitted = message.split('\n');
 
@@ -35,13 +35,31 @@ class CodeAnalyzer {
             [MessageConstants.ANALYSE]: this.orderedArray[`${MessageConstants.ANALYSE_INDEX}`],
         };
         this.assignLanguage();
+        this.assignPackages();
         this.assignComplexity(MessageConstants.TIME);
         this.assignComplexity(MessageConstants.SPACE);
 
         return this.processedResult;
     }
 
-    static async assignLanguage () {
+    static assignPackages () {
+        this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`] =
+            this.orderedArray[`${MessageConstants.PACKAGES_INDEX}`];
+
+        this.processedResult.packages = [];
+        const punctuationRegex = /[!"$%&'()*,./:;<=>?@[\]^`{|}~]/g;
+        const splitted = this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`].split(' ');
+        splitted.forEach((word, idx) => {
+            if (((word.startsWith('"') || word.startsWith("'") || word.startsWith('`')) &&
+                (word.endsWith('"') || word.endsWith("'") || word.endsWith('`')) ||
+                word.endsWith(',') ||
+                splitted[idx - 1] === 'and')) {
+                this.processedResult.packages.push(word.replace(punctuationRegex, ''));
+            }
+        });
+    }
+
+    static assignLanguage () {
         this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`] =
             this.orderedArray[`${MessageConstants.LANGUAGE_INDEX}`];
 
@@ -55,7 +73,7 @@ class CodeAnalyzer {
         });
     }
 
-    static async assignComplexity(option) {
+    static assignComplexity(option) {
         const complexity = `${option}_${MessageConstants.COMPLEXITY}`;
         this.processedResult[`${complexity}_${MessageConstants.DETAILS}`] =
             this.orderedArray[MessageConstants[`${complexity}_${MessageConstants.INDEX}`.toUpperCase()]];

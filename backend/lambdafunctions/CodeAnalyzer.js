@@ -36,10 +36,16 @@ class CodeAnalyzer {
         };
         this.assignLanguage();
         this.assignPackages();
+        this.assignStylisticPractises();
         this.assignComplexity(MessageConstants.TIME);
         this.assignComplexity(MessageConstants.SPACE);
 
         return this.processedResult;
+    }
+
+    static assignStylisticPractises () {
+        this.processedResult[`${MessageConstants.STYLES}`] =
+            this.orderedArray[`${MessageConstants.STYLES_INDEX}`];
     }
 
     static assignPackages () {
@@ -48,7 +54,7 @@ class CodeAnalyzer {
 
         this.processedResult.packages = [];
         const punctuationRegex = /[!"$%&'()*,./:;<=>?@[\]^`{|}~]/g;
-        const splitted = this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`].split(' ');
+        const splitted = this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`].split('.')[0].split(' ');
         splitted.forEach((word, idx) => {
             if (((word.startsWith('"') || word.startsWith("'") || word.startsWith('`')) &&
                 (word.endsWith('"') || word.endsWith("'") || word.endsWith('`')) ||

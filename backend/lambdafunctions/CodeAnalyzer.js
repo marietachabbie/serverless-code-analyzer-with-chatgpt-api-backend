@@ -17,75 +17,60 @@ class CodeAnalyzer {
     }
 
     static generateQuestion(code) {
-        const question = `Tell me ${MessageConstants.TOPICS_AMOUNT} things about this code: ${MessageConstants.TOPICS.join(',')}`;
+        const question = `Tell me ${MessageConstants.TOPICS.length} things about this code: ${MessageConstants.TOPICS.join(',')}`;
         return question + '\n' + code;
     }
 
     static async analyseResponseMessage (message) {
-        const ordered = [];
-        const processedResult = {};
+        this.orderedArray = [];
         const splitted = message.split('\n');
 
         for (const line of splitted) {
             if (parseInt(line[0])) {
-                ordered[line[0]] = line.slice(line.indexOf(': ') + 2);
+                this.orderedArray[line[0]] = line.slice(line.indexOf(': ') + 2);
             }
         }
 
-        this.assignLanguageVersionExplanation(processedResult, ordered);
-        this.assignComplexities(processedResult, ordered);
+        this.processedResult = {
+            [MessageConstants.ANALYSE]: this.orderedArray[`${MessageConstants.ANALYSE_INDEX}`],
+        };
+        this.assignLanguage();
+        this.assignComplexity(MessageConstants.TIME);
+        this.assignComplexity(MessageConstants.SPACE);
 
-        return processedResult;
+        return this.processedResult;
     }
 
-    static async assignLanguageVersionExplanation (result, orderedArray) {
-        const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
+    static async assignLanguage () {
+        this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`] =
+            this.orderedArray[`${MessageConstants.LANGUAGE_INDEX}`];
 
-        result[MessageConstants.LANGUAGE_DETAILS] = orderedArray[MessageConstants.LANGUAGE_INDEX];
-        result[MessageConstants.VERSION_DETAILS] = orderedArray[MessageConstants.VERSION_INDEX];
-        result[MessageConstants.ANALYSE] = orderedArray[MessageConstants.ANALYSE_INDEX];
+        const punctuationRegex = /[!"$%&'()*,-./:;<=>?@[\]^_`{|}~]$/g;
+        const splitted = this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`].split(' ');
 
-        const language = result[MessageConstants.LANGUAGE_DETAILS].split(' ');
-        language.forEach((word, idx) => {
+        splitted.forEach((word, idx) => {
             if (idx !== 0 && /^[A-Z]/.test(word)) {
-                result[MessageConstants.LANGUAGE] = word.replace(punctuationRegex, '');
+                this.processedResult[MessageConstants.LANGUAGE] = word.replace(punctuationRegex, '');
             }
         });
-
-        const version = result[MessageConstants.VERSION_DETAILS].split(' ');
-        version.forEach((word) => {
-            if (/\d/.test(word)) {
-                result[MessageConstants.VERSION] = word.replace(punctuationRegex, '');
-            }
-        });
-
-        if (!result[MessageConstants.VERSION]) {
-            result[MessageConstants.VERSION] = 'Not specified';
-        }
     }
 
-    static async assignComplexities(result, orderedArray) {
-        const complexityPunctuationRegex = /[!"#$%&'*+,-.:;<=>?@[\]_`{|}~]/g;
+    static async assignComplexity(option) {
+        const complexity = `${option}_${MessageConstants.COMPLEXITY}`;
+        this.processedResult[`${complexity}_${MessageConstants.DETAILS}`] =
+            this.orderedArray[MessageConstants[`${complexity}_${MessageConstants.INDEX}`.toUpperCase()]];
+
+        const complexityPunctuationRegex = /[!"#$%&'*,.:;<=>?@[\]_`{|}~]$/g;
         const complexityRegex = /^O\(.*\)$/i;
 
-        result[MessageConstants.TIME_COMPLEXITY_DETAILS] =
-            orderedArray[MessageConstants.TIME_COMPLEXITY_INDEX];
-        result[MessageConstants.SPACE_COMPLEXITY_DETAILS] =
-            orderedArray[MessageConstants.SPACE_COMPLEXITY_INDEX];
-
-        const tcomplexity = result[MessageConstants.TIME_COMPLEXITY_DETAILS].split(' ');
-        tcomplexity.forEach(word => {
+        const splitted = this.processedResult[`${complexity}_${MessageConstants.DETAILS}`].split(' ');
+        splitted.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                result[MessageConstants.TIME_COMPLEXITY] = word.replace(complexityPunctuationRegex, '');
+                this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '');
             }
         });
 
-        const scomplexity = result[MessageConstants.SPACE_COMPLEXITY_DETAILS].split(' ');
-        scomplexity.forEach(word => {
-            if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                result[MessageConstants.SPACE_COMPLEXITY] = word.replace(complexityPunctuationRegex, '');
-            }
-        });
+        // if no complexity found and word constant was found set complexity to O(1)
     }
 
     static async requestDataFromChatgptAPI (content) {
@@ -102,7 +87,7 @@ class CodeAnalyzer {
             console.error(err);
         });
 
-        return response.data.choices[0].message.content;
+        return response.data?.choices?.[0].message?.content;
     }
 }
 

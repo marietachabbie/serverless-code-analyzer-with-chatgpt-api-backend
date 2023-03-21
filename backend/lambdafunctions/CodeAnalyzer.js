@@ -21,7 +21,7 @@ class CodeAnalyzer {
         return question + '\n' + code;
     }
 
-    static analyseResponseMessage (message) {
+        this.processedResult = {};
         this.orderedArray = [];
         const splitted = message.split('\n');
 
@@ -31,9 +31,7 @@ class CodeAnalyzer {
             }
         }
 
-        this.processedResult = {
-            [MessageConstants.ANALYSE]: this.orderedArray[`${MessageConstants.ANALYSE_INDEX}`],
-        };
+        this.assignAnalyse();
         this.assignLanguage();
         this.assignPackages();
         this.assignStylisticPractises();
@@ -53,7 +51,7 @@ class CodeAnalyzer {
             this.orderedArray[`${MessageConstants.PACKAGES_INDEX}`];
 
         this.processedResult.packages = [];
-        const punctuationRegex = /[!"$%&'()*,./:;<=>?@[\]^`{|}~]/g;
+        const punctuationRegex = /[!"$%&'()*,:;<=>?@[\]^`{|}~]/g;
         const splitted = this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`].split('.')[0].split(' ');
         splitted.forEach((word, idx) => {
             if (((word.startsWith('"') || word.startsWith("'") || word.startsWith('`')) &&

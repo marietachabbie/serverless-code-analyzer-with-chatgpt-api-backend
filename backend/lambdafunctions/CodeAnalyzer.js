@@ -4,7 +4,7 @@ const Utils = require('../utils/Utils');
 const MessageConstants = require('../utils/MessageConstants');
 
 class CodeAnalyzer {
-    static async execute(code) {
+    async execute(code) {
         if (!code) {
             return Utils.httpResponse(200, null);
         }
@@ -16,11 +16,12 @@ class CodeAnalyzer {
         return Utils.httpResponse(200, data);
     }
 
-    static generateQuestion(code) {
+    generateQuestion(code) {
         const question = `Tell me ${MessageConstants.TOPICS.length} things about this code: ${MessageConstants.TOPICS.join(',')}`;
         return question + '\n' + code;
     }
 
+    analyseResponseMessage (message) {
         this.processedResult = {};
         this.orderedArray = [];
         const splitted = message.split('\n');
@@ -41,12 +42,16 @@ class CodeAnalyzer {
         return this.processedResult;
     }
 
-    static assignStylisticPractises () {
+    assignAnalyse () {
+        this.processedResult[MessageConstants.ANALYSE] = this.orderedArray[`${MessageConstants.ANALYSE_INDEX}`];
+    }
+
+    assignStylisticPractises () {
         this.processedResult[`${MessageConstants.STYLES}`] =
             this.orderedArray[`${MessageConstants.STYLES_INDEX}`];
     }
 
-    static assignPackages () {
+    assignPackages () {
         this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`] =
             this.orderedArray[`${MessageConstants.PACKAGES_INDEX}`];
 
@@ -63,7 +68,7 @@ class CodeAnalyzer {
         });
     }
 
-    static assignLanguage () {
+    assignLanguage () {
         this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`] =
             this.orderedArray[`${MessageConstants.LANGUAGE_INDEX}`];
 
@@ -77,7 +82,7 @@ class CodeAnalyzer {
         });
     }
 
-    static assignComplexity(option) {
+    assignComplexity(option) {
         const complexity = `${option}_${MessageConstants.COMPLEXITY}`;
         this.processedResult[`${complexity}_${MessageConstants.DETAILS}`] =
             this.orderedArray[MessageConstants[`${complexity}_${MessageConstants.INDEX}`.toUpperCase()]];
@@ -100,7 +105,7 @@ class CodeAnalyzer {
         }
     }
 
-    static async requestDataFromChatgptAPI (content) {
+    async requestDataFromChatgptAPI (content) {
         const role = process.env.OPENAI_USER;
         const configuration = new Configuration({
             organization: process.env.OPENAI_ORGANIZATION_ID,

@@ -6,9 +6,10 @@ const UserDataCollector = require('./lambdafunctions/UserDataCollector');
 
 module.exports.CodeAnalyzer = async (event) => {
     try {
+        const lambdaInstance = new CodeAnalyzer();
         const [ body, httpData ] = Utils.parseHttpEvent(event);
         await UserDataCollector.execute(httpData);
-        return await CodeAnalyzer.execute(body.code);
+        return await lambdaInstance.execute(body.code);
     } catch (error) {
         console.error(error);
     }

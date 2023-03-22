@@ -1,7 +1,7 @@
 const Utils = require('./utils/Utils');
 Utils.setupEnvironment('dev');
 
-const CodeAnalyser = require('./lambdafunctions/CodeAnalyzer');
+const CodeAnalyser = require('./lambdafunctions/CodeAnalyser');
 const UserDataCollector = require('./lambdafunctions/UserDataCollector');
 
 module.exports.CodeAnalysis = async (event) => {

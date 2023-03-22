@@ -1,5 +1,5 @@
 class UserDataCollector {
-    static async execute(data) {
+    async execute(data) {
 
     }
 }

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "aws-sdk": "^2.1339.0",
     "eslint": "^8.35.0",
     "node-yaml-config": "^1.0.0",
     "openai": "^3.2.1"

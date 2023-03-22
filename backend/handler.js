@@ -1,15 +1,26 @@
 const Utils = require('./utils/Utils');
 Utils.setupEnvironment('dev');
 
-const CodeAnalyzer = require('./lambdafunctions/CodeAnalyzer');
+const CodeAnalyser = require('./lambdafunctions/CodeAnalyzer');
 const UserDataCollector = require('./lambdafunctions/UserDataCollector');
 
-module.exports.CodeAnalyzer = async (event) => {
+module.exports.CodeAnalysis = async (event) => {
     try {
-        const lambdaInstance = new CodeAnalyzer();
         const [ body, httpData ] = Utils.parseHttpEvent(event);
-        await UserDataCollector.execute(httpData);
+        await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, httpData);
+
+        const lambdaInstance = new CodeAnalyser();
         return await lambdaInstance.execute(body.code);
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+module.exports.UserDataCollection = async (event) => {
+    try {
+        const httpData = Utils.parseSnsEvent(event);
+        const lambdaInstance = new UserDataCollector();
+        await lambdaInstance.execute(httpData);
     } catch (error) {
         console.error(error);
     }

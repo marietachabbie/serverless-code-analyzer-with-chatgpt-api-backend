@@ -3,7 +3,7 @@ const { Configuration, OpenAIApi } = require('openai');
 const Utils = require('../utils/Utils');
 const MessageConstants = require('../utils/MessageConstants');
 
-class CodeAnalyzer {
+class CodeAnalyser {
     async execute(code) {
         if (!code) {
             return Utils.httpResponse(200, null);
@@ -123,4 +123,4 @@ class CodeAnalyzer {
     }
 }
 
-module.exports = CodeAnalyzer;
+module.exports = CodeAnalyser;

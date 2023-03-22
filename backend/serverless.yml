@@ -3,13 +3,23 @@ service: code-analyzer
 provider:
   name: aws
   runtime: nodejs18.x
-  region: ${self:provider.environment.AWS_REGION}
+  timeout: 900
+  region: ${self:provider.environment.REGION}
   stage: dev
   environment: ${file(env.yml):${self:provider.stage}}
 
 functions:
-  CodeAnalyzer:
-    handler: handler.CodeAnalyzer
+  CodeAnalysis:
+    handler: handler.CodeAnalysis
+    memorySize: 128
+    events:
+      - httpApi:
+          path: /analyse
+          method: post
+
+  UserDataCollection:
+    handler: handler.UserDataCollection
+    memorySize: 128
     vpc:
       securityGroupIds:
         - ${self:provider.environment.SECURITY_GROUP_ID}
@@ -18,6 +28,4 @@ functions:
         - ${self:provider.environment.SUBNET_ID_2}
         - ${self:provider.environment.SUBNET_ID_3}
     events:
-      - httpApi:
-          path: /analyze
-          method: post
+      - sns: ${self:provider.environment.DATA_COLLECTOR_SNS}

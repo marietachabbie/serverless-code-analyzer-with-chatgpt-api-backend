@@ -6,21 +6,17 @@ const DataCollector = require('./lambdafunctions/DataCollector');
 
 module.exports.CodeAnalysis = async (event) => {
     try {
-        const [ body, httpData ] = Utils.parseHttpEvent(event);
-        await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, httpData);
-
         const lambdaInstance = new CodeAnalyser();
-        return await lambdaInstance.execute(body.code);
+        await lambdaInstance.execute(event);
     } catch (error) {
         console.error(error);
     }
 };
 
-module.exports.UserDataCollection = async (event) => {
+module.exports.DataCollection = async (event) => {
     try {
-        const httpData = Utils.parseSnsEvent(event);
-        const lambdaInstance = new UserDataCollector();
-        await lambdaInstance.execute(httpData);
+        const lambdaInstance = new DataCollector();
+        await lambdaInstance.execute(event);
     } catch (error) {
         console.error(error);
     }

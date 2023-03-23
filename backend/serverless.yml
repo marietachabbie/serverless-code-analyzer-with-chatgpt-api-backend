@@ -9,7 +9,7 @@ provider:
   environment: ${file(env.yml):${self:provider.stage}}
 
 functions:
-  CodeAnalysis:
+  NetCodeAnalysis:
     handler: handler.CodeAnalysis
     memorySize: 128
     events:
@@ -17,8 +17,8 @@ functions:
           path: /analyse
           method: post
 
-  UserDataCollection:
-    handler: handler.UserDataCollection
+  VpcDataCollection:
+    handler: handler.DataCollection
     memorySize: 128
     vpc:
       securityGroupIds:

@@ -9,14 +9,14 @@ module.exports.setupEnvironment = (env) => {
     }
 };
 
-module.exports.parseHttpEvent = (event) => {
+module.exports.parseHttpEvent = (event, param) => {
     const httpData = event.requestContext.http;
     if (!event.body) {
         return [ null, httpData ];
     }
 
-    return [ JSON.parse(event.body), httpData ];
-
+    const body = param ? JSON.parse(event.body)[param] : JSON.parse(event.body);
+    return [ body, httpData ];
 };
 
 module.exports.parseSnsEvent = (event, param) => {

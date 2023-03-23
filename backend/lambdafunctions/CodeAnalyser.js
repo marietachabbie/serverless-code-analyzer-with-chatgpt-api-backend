@@ -1,31 +1,55 @@
 const { Configuration, OpenAIApi } = require('openai');
+const geoip = require('geoip-lite');
 
 const Utils = require('../utils/Utils');
 const MessageConstants = require('../utils/MessageConstants');
 
 class CodeAnalyser {
-    async execute(code) {
+    async execute(event) {
+        const [ code, httpData ] = Utils.parseHttpEvent(event, 'code');
         if (!code) {
             return Utils.httpResponse(200, null);
         }
 
-        const question = this.generateQuestion(code);
+        const task = httpData.path.slice(1);
+        const question = this.generateQuestion(code, task);
         const response = await this.requestDataFromChatgptAPI(question);
 
-        const data = await this.analyseResponseMessage(response);
-        return Utils.httpResponse(200, data);
+        this.processedResult = {}; this.orderedArray = [];
+        if (task === MessageConstants.ANALYSE){
+            this.generateCodeAnalysisData(response);
+        } else {
+            this.generateCodeOptimisationData(response);
+        }
+        const dataForDb = this.generateCompleteDataForDb(httpData, task);
+        await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, dataForDb);
     }
 
-    generateQuestion(code) {
-        const question = `Tell me ${MessageConstants.TOPICS.length} things about this code: ${MessageConstants.TOPICS.join(',')}`;
+    generateQuestion(code, task) {
+        let question = 'Tell me ';
+        switch (task) {
+            case MessageConstants.OPTIMISE:
+                question += 'language of this code and optimise it';
+                break;
+            case MessageConstants.COMMENT:
+                question += 'language of this code and add comments to it';
+                break;
+            case MessageConstants.ANALYSE:
+            default:
+                question += `${MessageConstants.TOPICS.length} things about this code: ${MessageConstants.TOPICS.join(',')}`;
+        }
         return question + '\n' + code;
     }
 
-    analyseResponseMessage (message) {
-        this.processedResult = {};
-        this.orderedArray = [];
+    generateCodeOptimisationData (message) {
         const splitted = message.split('\n');
+        this.orderedArray[MessageConstants.LANGUAGE_INDEX] = splitted.shift();
+        this.assignLanguage();
+        this.processedResult.result = splitted.join('\n');
+    }
 
+    generateCodeAnalysisData (message) {
+        const splitted = message.split('\n');
         for (const line of splitted) {
             if (parseInt(line[0])) {
                 this.orderedArray[line[0]] = line.slice(line.indexOf(': ') + 2);
@@ -38,8 +62,16 @@ class CodeAnalyser {
         this.assignStylisticPractises();
         this.assignComplexity(MessageConstants.TIME);
         this.assignComplexity(MessageConstants.SPACE);
+    }
 
-        return this.processedResult;
+    generateCompleteDataForDb(http, task) {
+        return {
+            data: this.processedResult,
+            language: this.processedResult.language,
+            task: task,
+            country: geoip.lookup(http.sourceIp).country,
+            user_agent: http.userAgent,
+        };
     }
 
     assignAnalyse () {
@@ -70,7 +102,7 @@ class CodeAnalyser {
 
     assignLanguage () {
         this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`] =
-            this.orderedArray[`${MessageConstants.LANGUAGE_INDEX}`];
+            this.orderedArray[MessageConstants.LANGUAGE_INDEX];
 
         const punctuationRegex = /[!"$%&'()*,-./:;<=>?@[\]^_`{|}~]$/g;
         const splitted = this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`].split(' ');

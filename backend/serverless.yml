@@ -17,6 +17,22 @@ functions:
           path: /analyse
           method: post
 
+  NetCodeOptimisation:
+    handler: handler.CodeAnalysis
+    memorySize: 128
+    events:
+      - httpApi:
+          path: /optimise
+          method: post
+
+  NetCodeComment:
+    handler: handler.CodeAnalysis
+    memorySize: 128
+    events:
+      - httpApi:
+          path: /comment
+          method: post
+
   VpcDataCollection:
     handler: handler.DataCollection
     memorySize: 128

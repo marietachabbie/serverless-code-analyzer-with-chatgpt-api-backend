@@ -1,7 +1,7 @@
-class UserDataCollector {
+class DataCollector {
     async execute(data) {
 
     }
 }
 
-module.exports = UserDataCollector;
+module.exports = DataCollector;

@@ -9,6 +9,13 @@ module.exports.setupEnvironment = (env) => {
     }
 };
 
+module.exports.lambdaFunctionExecutor = async (lambda, event) => {
+    const start = Date.now();
+    const instance = new lambda();
+    await instance.execute(event);
+    console.log(`${lambda.name} execution done. It took ${Date.now() - start} miliseconds`);
+};
+
 module.exports.parseHttpEvent = (event, param) => {
     const httpData = event.requestContext.http;
     if (!event.body) {
@@ -19,10 +26,17 @@ module.exports.parseHttpEvent = (event, param) => {
     return [ body, httpData ];
 };
 
-module.exports.parseSnsEvent = (event, param) => {
+module.exports.parseLambdaEvent = (event, param) => {
     try {
-        const message = JSON.parse(event.Records[0].Sns.Message);
-        return param ? message[param] : message;
+        let result = event;
+        if (event.Records?.[0].Sns.Message) {
+            const message = JSON.parse(event.Records[0].Sns.Message);
+            result = param ? message[param] : message;
+        } else if (event.body) {
+            result = JSON.parse(event.body);
+        }
+
+        return result;
     } catch (err) {
         console.error(err);
     }

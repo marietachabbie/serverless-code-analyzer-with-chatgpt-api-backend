@@ -6,8 +6,7 @@ const DataCollector = require('./lambdafunctions/DataCollector');
 
 module.exports.CodeAnalysis = async (event) => {
     try {
-        const lambdaInstance = new CodeAnalyser();
-        await lambdaInstance.execute(event);
+        await Utils.lambdaFunctionExecutor(CodeAnalyser, event);
     } catch (error) {
         console.error(error);
     }
@@ -15,8 +14,7 @@ module.exports.CodeAnalysis = async (event) => {
 
 module.exports.DataCollection = async (event) => {
     try {
-        const lambdaInstance = new DataCollector();
-        await lambdaInstance.execute(event);
+        await Utils.lambdaFunctionExecutor(DataCollector, event);
     } catch (error) {
         console.error(error);
     }

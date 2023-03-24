@@ -3,16 +3,17 @@ const geoip = require('geoip-lite');
 
 const Utils = require('../utils/Utils');
 const MessageConstants = require('../utils/MessageConstants');
+const DataCollector = require('./DataCollector');
 
 class CodeAnalyser {
     async execute(event) {
-        const [ code, httpData ] = Utils.parseHttpEvent(event, 'code');
-        if (!code) {
+        const [ body, httpData ] = Utils.parseHttpEvent(event);
+        if (!body.code) {
             return Utils.httpResponse(200, null);
         }
 
         const task = httpData.path.slice(1);
-        const question = this.generateQuestion(code, task);
+        const question = this.generateQuestion(body.code, task);
         const response = await this.requestDataFromChatgptAPI(question);
 
         this.processedResult = {}; this.orderedArray = [];
@@ -21,7 +22,10 @@ class CodeAnalyser {
         } else {
             this.generateCodeOptimisationData(response);
         }
-        const dataForDb = this.generateCompleteDataForDb(httpData, task);
+        const dataForDb = this.generateCompleteDataForDb(httpData, body.userToken, task);
+        if (process.env.local_execution) {
+            return await Utils.lambdaFunctionExecutor(DataCollector, dataForDb);
+        }
         await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, dataForDb);
     }
 
@@ -64,12 +68,14 @@ class CodeAnalyser {
         this.assignComplexity(MessageConstants.SPACE);
     }
 
-    generateCompleteDataForDb(http, task) {
+    generateCompleteDataForDb(http, token, task) {
         return {
+            user_token: token,
             data: this.processedResult,
-            language: this.processedResult.language,
             task: task,
-            country: geoip.lookup(http.sourceIp).country,
+            language: this.processedResult.language,
+            request: task,
+            country_code: geoip.lookup(http.sourceIp).country,
             user_agent: http.userAgent,
         };
     }

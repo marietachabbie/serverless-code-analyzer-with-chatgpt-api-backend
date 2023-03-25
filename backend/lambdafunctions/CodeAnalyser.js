@@ -70,13 +70,17 @@ class CodeAnalyser {
 
     generateCompleteDataForDb(http, token, task) {
         return {
-            user_token: token,
-            data: this.processedResult,
-            task: task,
-            language: this.processedResult.language,
-            request: task,
-            country_code: geoip.lookup(http.sourceIp).country,
-            user_agent: http.userAgent,
+            codeData: {
+                user_token: token,
+                data: this.processedResult,
+            },
+            requestData: {
+                task: task,
+                language: this.processedResult.language,
+                request: task,
+                country_code: geoip.lookup(http.sourceIp).country,
+                user_agent: http.userAgent,
+            },
         };
     }
 

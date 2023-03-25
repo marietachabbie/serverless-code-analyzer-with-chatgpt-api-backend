@@ -9,7 +9,7 @@ provider:
   environment: ${file(env.yml):${self:provider.stage}}
 
 functions:
-  NetCodeAnalysis:
+  NETCodeAnalysis:
     handler: handler.CodeAnalysis
     memorySize: 128
     events:
@@ -17,7 +17,7 @@ functions:
           path: /analyse
           method: post
 
-  NetCodeOptimisation:
+  NETCodeOptimisation:
     handler: handler.CodeAnalysis
     memorySize: 128
     events:
@@ -25,7 +25,7 @@ functions:
           path: /optimise
           method: post
 
-  NetCodeComment:
+  NETCodeComment:
     handler: handler.CodeAnalysis
     memorySize: 128
     events:
@@ -33,9 +33,9 @@ functions:
           path: /comment
           method: post
 
-  VpcDataCollection:
+  VPCDataCollection:
     handler: handler.DataCollection
-    memorySize: 128
+    memorySize: 256
     vpc:
       securityGroupIds:
         - ${self:provider.environment.SECURITY_GROUP_ID}

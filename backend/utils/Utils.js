@@ -3,7 +3,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 
 module.exports.setupEnvironment = (env) => {
-    const content = configLoader.load('./env.yml', env);
+    const content = configLoader.load('./backend/env.yml', env);
     for (let key in content) {
         process.env[key] = content[key];
     }
@@ -29,10 +29,13 @@ module.exports.parseHttpEvent = (event, param) => {
 module.exports.parseLambdaEvent = (event, param) => {
     try {
         let result = event;
+        /* If the event was passed from local executor */
         if (event.Records?.[0].Sns.Message) {
+            /* If lambda was triggered by SNS */
             const message = JSON.parse(event.Records[0].Sns.Message);
             result = param ? message[param] : message;
         } else if (event.body) {
+            /* If lambda was triggered by http */
             result = param ? JSON.parse(event.body)[param] : JSON.parse(event.body);
         }
 

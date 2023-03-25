@@ -9,7 +9,7 @@ class CodeAnalyser {
     async execute(event) {
         const [ body, httpData ] = Utils.parseHttpEvent(event);
         if (!body.code) {
-            return Utils.httpResponse(200, null);
+            return;
         }
 
         const task = httpData.path.slice(1);
@@ -75,7 +75,7 @@ class CodeAnalyser {
                 data: this.processedResult,
             },
             requestData: {
-                task: task,
+                user_token: token,
                 language: this.processedResult.language,
                 request: task,
                 country_code: geoip.lookup(http.sourceIp).country,

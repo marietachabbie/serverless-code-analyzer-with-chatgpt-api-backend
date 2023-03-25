@@ -7,8 +7,10 @@ const DataCollector = require('./lambdafunctions/DataCollector');
 module.exports.CodeAnalysis = async (event) => {
     try {
         await Utils.lambdaFunctionExecutor(CodeAnalyser, event);
+        return Utils.httpResponse(200, { message: 'Successfully processed!' });
     } catch (error) {
         console.error(error);
+        return Utils.httpResponse(500, { message: 'Something went wrong!' });
     }
 };
 

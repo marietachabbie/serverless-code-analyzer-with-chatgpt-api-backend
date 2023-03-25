@@ -11,7 +11,7 @@ provider:
 functions:
   NETCodeAnalysis:
     handler: handler.CodeAnalysis
-    memorySize: 128
+    memorySize: 256
     events:
       - httpApi:
           path: /analyse
@@ -19,7 +19,7 @@ functions:
 
   NETCodeOptimisation:
     handler: handler.CodeAnalysis
-    memorySize: 128
+    memorySize: 256
     events:
       - httpApi:
           path: /optimise
@@ -27,7 +27,7 @@ functions:
 
   NETCodeComment:
     handler: handler.CodeAnalysis
-    memorySize: 128
+    memorySize: 256
     events:
       - httpApi:
           path: /comment

@@ -25,3 +25,6 @@ module.exports.TOPICS = [
     module.exports.PACKAGES,
     module.exports.STYLES,
 ];
+
+module.exports.CODE_ANALYSES_TABLE = 'code_analyses';
+module.exports.REQUEST_STATISTICS_TABLE = 'request_statistics';

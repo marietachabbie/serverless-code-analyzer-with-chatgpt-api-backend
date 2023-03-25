@@ -4,6 +4,7 @@
     "eslint": "^8.35.0",
     "geoip-lite": "^1.4.7",
     "node-yaml-config": "^1.0.0",
-    "openai": "^3.2.1"
+    "openai": "^3.2.1",
+    "pg-pool": "^3.6.0"
   }
 }

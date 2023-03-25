@@ -28,10 +28,10 @@ class DBConnectionManager {
     }
 
     insertMap(table, map, client = this) {
-        const fields = [];
-        const vals = [];
-        const params = [];
-        let i = 1;
+        const fields = [ 'created_at' ];
+        const vals = [ new Date() ];
+        const params = [ "$1" ];
+        let i = 2;
         for (const key in map) {
             fields.push('"' + key + '"');
             params.push("$" + i++);

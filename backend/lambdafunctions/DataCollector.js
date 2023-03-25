@@ -1,6 +1,6 @@
 const Utils = require('../utils/Utils');
 const DBConnectionManager = require('../utils/DBConnectionManager');
-const MessageConstants = require('../utils/MessageConstants');
+const CONSTANTS = require('../utils/Constants');
 
 class DataCollector {
     async execute(event) {
@@ -8,8 +8,8 @@ class DataCollector {
         const { codeData, requestData } = eventMessage;
 
         const dbConnectionManager = new DBConnectionManager();
-        await dbConnectionManager.insertMap(MessageConstants.CODE_ANALYSES_TABLE, codeData);
-        await dbConnectionManager.insertMap(MessageConstants.REQUEST_STATISTICS_TABLE, requestData);
+        await dbConnectionManager.insertMap(CONSTANTS.CODE_ANALYSES_TABLE, codeData);
+        await dbConnectionManager.insertMap(CONSTANTS.REQUEST_STATISTICS_TABLE, requestData);
     }
 }
 

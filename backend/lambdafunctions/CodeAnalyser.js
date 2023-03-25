@@ -2,7 +2,7 @@ const { Configuration, OpenAIApi } = require('openai');
 const geoip = require('geoip-lite');
 
 const Utils = require('../utils/Utils');
-const MessageConstants = require('../utils/MessageConstants');
+const CONSTANTS = require('../utils/Constants');
 const DataCollector = require('./DataCollector');
 
 class CodeAnalyser {
@@ -17,7 +17,7 @@ class CodeAnalyser {
         const response = await this.requestDataFromChatgptAPI(question);
 
         this.processedResult = {}; this.orderedArray = [];
-        if (task === MessageConstants.ANALYSE){
+        if (task === CONSTANTS.ANALYSE){
             this.generateCodeAnalysisData(response);
         } else {
             this.generateCodeOptimisationData(response);
@@ -32,22 +32,22 @@ class CodeAnalyser {
     generateQuestion(code, task) {
         let question = 'Tell me ';
         switch (task) {
-            case MessageConstants.OPTIMISE:
+            case CONSTANTS.OPTIMISE:
                 question += 'language of this code and optimise it';
                 break;
-            case MessageConstants.COMMENT:
+            case CONSTANTS.COMMENT:
                 question += 'language of this code and add comments to it';
                 break;
-            case MessageConstants.ANALYSE:
+            case CONSTANTS.ANALYSE:
             default:
-                question += `${MessageConstants.TOPICS.length} things about this code: ${MessageConstants.TOPICS.join(',')}`;
+                question += `${CONSTANTS.TOPICS.length} things about this code: ${CONSTANTS.TOPICS.join(',')}`;
         }
         return question + '\n' + code;
     }
 
     generateCodeOptimisationData (message) {
         const splitted = message.split('\n');
-        this.orderedArray[MessageConstants.LANGUAGE_INDEX] = splitted.shift();
+        this.orderedArray[CONSTANTS.LANGUAGE_INDEX] = splitted.shift();
         this.assignLanguage();
         this.processedResult.result = splitted.join('\n');
     }
@@ -64,8 +64,8 @@ class CodeAnalyser {
         this.assignLanguage();
         this.assignPackages();
         this.assignStylisticPractises();
-        this.assignComplexity(MessageConstants.TIME);
-        this.assignComplexity(MessageConstants.SPACE);
+        this.assignComplexity(CONSTANTS.TIME);
+        this.assignComplexity(CONSTANTS.SPACE);
     }
 
     generateCompleteDataForDb(http, token, task) {
@@ -85,21 +85,21 @@ class CodeAnalyser {
     }
 
     assignAnalyse () {
-        this.processedResult[MessageConstants.ANALYSE] = this.orderedArray[`${MessageConstants.ANALYSE_INDEX}`];
+        this.processedResult[CONSTANTS.ANALYSE] = this.orderedArray[`${CONSTANTS.ANALYSE_INDEX}`];
     }
 
     assignStylisticPractises () {
-        this.processedResult[`${MessageConstants.STYLES}`] =
-            this.orderedArray[`${MessageConstants.STYLES_INDEX}`];
+        this.processedResult[`${CONSTANTS.STYLES}`] =
+            this.orderedArray[`${CONSTANTS.STYLES_INDEX}`];
     }
 
     assignPackages () {
-        this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`] =
-            this.orderedArray[`${MessageConstants.PACKAGES_INDEX}`];
+        this.processedResult[`${CONSTANTS.PACKAGES}_${CONSTANTS.DETAILS}`] =
+            this.orderedArray[`${CONSTANTS.PACKAGES_INDEX}`];
 
         this.processedResult.packages = [];
         const punctuationRegex = /[!"$%&'()*,:;<=>?@[\]^`{|}~]/g;
-        const splitted = this.processedResult[`${MessageConstants.PACKAGES}_${MessageConstants.DETAILS}`].split('.')[0].split(' ');
+        const splitted = this.processedResult[`${CONSTANTS.PACKAGES}_${CONSTANTS.DETAILS}`].split('.')[0].split(' ');
         splitted.forEach((word, idx) => {
             if (((word.startsWith('"') || word.startsWith("'") || word.startsWith('`')) &&
                 (word.endsWith('"') || word.endsWith("'") || word.endsWith('`')) ||
@@ -111,29 +111,29 @@ class CodeAnalyser {
     }
 
     assignLanguage () {
-        this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`] =
-            this.orderedArray[MessageConstants.LANGUAGE_INDEX];
+        this.processedResult[`${CONSTANTS.LANGUAGE}_${CONSTANTS.DETAILS}`] =
+            this.orderedArray[CONSTANTS.LANGUAGE_INDEX];
 
         const punctuationRegex = /[!"$%&'()*,-./:;<=>?@[\]^_`{|}~]$/g;
-        const splitted = this.processedResult[`${MessageConstants.LANGUAGE}_${MessageConstants.DETAILS}`].split(' ');
+        const splitted = this.processedResult[`${CONSTANTS.LANGUAGE}_${CONSTANTS.DETAILS}`].split(' ');
 
         splitted.forEach((word, idx) => {
             if (idx !== 0 && /^[A-Z]/.test(word)) {
-                this.processedResult[MessageConstants.LANGUAGE] = word.replace(punctuationRegex, '');
+                this.processedResult[CONSTANTS.LANGUAGE] = word.replace(punctuationRegex, '');
             }
         });
     }
 
     assignComplexity(option) {
-        const complexity = `${option}_${MessageConstants.COMPLEXITY}`;
-        this.processedResult[`${complexity}_${MessageConstants.DETAILS}`] =
-            this.orderedArray[MessageConstants[`${complexity}_${MessageConstants.INDEX}`.toUpperCase()]];
+        const complexity = `${option}_${CONSTANTS.COMPLEXITY}`;
+        this.processedResult[`${complexity}_${CONSTANTS.DETAILS}`] =
+            this.orderedArray[CONSTANTS[`${complexity}_${CONSTANTS.INDEX}`.toUpperCase()]];
 
         const complexityPunctuationRegex = /[!"#$%&'*,.:;<=>?@[\]_`{|}~]$/g;
         const complexityRegex = /^O\(.*\)$/i;
         let isConstant = false;
 
-        const splitted = this.processedResult[`${complexity}_${MessageConstants.DETAILS}`].split(' ');
+        const splitted = this.processedResult[`${complexity}_${CONSTANTS.DETAILS}`].split(' ');
         splitted.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
                 this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '');

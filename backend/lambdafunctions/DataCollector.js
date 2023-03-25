@@ -11,6 +11,12 @@ class DataCollector {
         await dbConnectionManager.insertMap(CONSTANTS.CODE_ANALYSES_TABLE, codeData);
         await dbConnectionManager.insertMap(CONSTANTS.REQUEST_STATISTICS_TABLE, requestData);
     }
+
+    static async getResults (token) {
+        const dbConnectionManager = new DBConnectionManager();
+        const query = `select * from code_analyses where user_token = '${token}'`;
+        return await dbConnectionManager.query(query);
+    }
 }
 
 module.exports = DataCollector;

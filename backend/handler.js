@@ -21,3 +21,9 @@ module.exports.DataCollection = async (event) => {
         console.error(error);
     }
 };
+
+module.exports.ShowResults = async (event) => {
+    const eventMessage = Utils.parseLambdaEvent(event);
+    const result = await DataCollector.getResults(eventMessage.userToken);
+    return Utils.httpResponse(200, result?.[0] ?? null);
+};

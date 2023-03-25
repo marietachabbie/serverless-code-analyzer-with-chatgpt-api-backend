@@ -33,7 +33,7 @@ module.exports.parseLambdaEvent = (event, param) => {
             const message = JSON.parse(event.Records[0].Sns.Message);
             result = param ? message[param] : message;
         } else if (event.body) {
-            result = JSON.parse(event.body);
+            result = param ? JSON.parse(event.body)[param] : JSON.parse(event.body);
         }
 
         return result;

@@ -85,17 +85,17 @@ class CodeAnalyser {
     }
 
     assignAnalyse () {
-        this.processedResult[CONSTANTS.ANALYSE] = this.orderedArray[`${CONSTANTS.ANALYSE_INDEX}`];
+        this.processedResult[CONSTANTS.ANALYSE] = this.orderedArray[`${CONSTANTS.ANALYSE_INDEX}`].trim();
     }
 
     assignStylisticPractises () {
         this.processedResult[`${CONSTANTS.STYLES}`] =
-            this.orderedArray[`${CONSTANTS.STYLES_INDEX}`];
+            this.orderedArray[`${CONSTANTS.STYLES_INDEX}`].trim();
     }
 
     assignPackages () {
         this.processedResult[`${CONSTANTS.PACKAGES}_${CONSTANTS.DETAILS}`] =
-            this.orderedArray[`${CONSTANTS.PACKAGES_INDEX}`];
+            this.orderedArray[`${CONSTANTS.PACKAGES_INDEX}`].trim();
 
         this.processedResult.packages = [];
         const punctuationRegex = /[!"$%&'()*,:;<=>?@[\]^`{|}~]/g;
@@ -105,21 +105,21 @@ class CodeAnalyser {
                 (word.endsWith('"') || word.endsWith("'") || word.endsWith('`')) ||
                 word.endsWith(',') ||
                 splitted[idx - 1] === 'and')) {
-                this.processedResult.packages.push(word.replace(punctuationRegex, ''));
+                this.processedResult.packages.push(word.replace(punctuationRegex, '').trim());
             }
         });
     }
 
     assignLanguage () {
         this.processedResult[`${CONSTANTS.LANGUAGE}_${CONSTANTS.DETAILS}`] =
-            this.orderedArray[CONSTANTS.LANGUAGE_INDEX];
+            this.orderedArray[CONSTANTS.LANGUAGE_INDEX].trim();
 
         const punctuationRegex = /[!"$%&'()*,-./:;<=>?@[\]^_`{|}~]$/g;
         const splitted = this.processedResult[`${CONSTANTS.LANGUAGE}_${CONSTANTS.DETAILS}`].split(' ');
 
         splitted.forEach((word, idx) => {
             if (idx !== 0 && /^[A-Z]/.test(word)) {
-                this.processedResult[CONSTANTS.LANGUAGE] = word.replace(punctuationRegex, '');
+                this.processedResult[CONSTANTS.LANGUAGE] = word.replace(punctuationRegex, '').trim();
             }
         });
     }
@@ -127,7 +127,7 @@ class CodeAnalyser {
     assignComplexity(option) {
         const complexity = `${option}_${CONSTANTS.COMPLEXITY}`;
         this.processedResult[`${complexity}_${CONSTANTS.DETAILS}`] =
-            this.orderedArray[CONSTANTS[`${complexity}_${CONSTANTS.INDEX}`.toUpperCase()]];
+            this.orderedArray[CONSTANTS[`${complexity}_${CONSTANTS.INDEX}`.toUpperCase()]].trim();
 
         const complexityPunctuationRegex = /[!"#$%&'*,.:;<=>?@[\]_`{|}~]$/g;
         const complexityRegex = /^O\(.*\)$/i;
@@ -136,7 +136,7 @@ class CodeAnalyser {
         const splitted = this.processedResult[`${complexity}_${CONSTANTS.DETAILS}`].split(' ');
         splitted.forEach(word => {
             if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '');
+                this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '').trim();
             } else if (word === 'constant') {
                 isConstant = true;
             }

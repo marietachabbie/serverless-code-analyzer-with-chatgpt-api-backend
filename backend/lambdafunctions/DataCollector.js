@@ -14,7 +14,7 @@ class DataCollector {
 
     static async getResults (token) {
         const dbConnectionManager = new DBConnectionManager();
-        const query = `select * from code_analyses where user_token = '${token}'`;
+        const query = `select data from code_analyses where user_token = '${token}'`;
         return await dbConnectionManager.query(query);
     }
 }

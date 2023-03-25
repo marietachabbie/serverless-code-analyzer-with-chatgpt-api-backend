@@ -3,7 +3,7 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 
 module.exports.setupEnvironment = (env) => {
-    const content = configLoader.load('./backend/env.yml', env);
+    const content = configLoader.load('./env.yml', env);
     for (let key in content) {
         process.env[key] = content[key];
     }
@@ -42,6 +42,7 @@ module.exports.parseLambdaEvent = (event, param) => {
         return result;
     } catch (err) {
         console.error(err);
+        throw err;
     }
 };
 

@@ -23,7 +23,11 @@ module.exports.DataCollection = async (event) => {
 };
 
 module.exports.ShowResults = async (event) => {
-    const eventMessage = Utils.parseLambdaEvent(event);
-    const result = await DataCollector.getResults(eventMessage.userToken);
-    return Utils.httpResponse(200, result?.[0] ?? null);
+    try {
+        const eventMessage = Utils.parseLambdaEvent(event);
+        const result = await DataCollector.getResults(eventMessage.userToken);
+        return Utils.httpResponse(200, result?.[0] ?? null);
+    } catch (err) {
+        return Utils.httpResponse(500, { message: 'Something went wrong!' });
+    }
 };

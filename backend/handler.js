@@ -2,7 +2,7 @@ const Utils = require('./utils/Utils');
 Utils.setupEnvironment('dev');
 
 const CodeAnalyser = require('./lambdafunctions/CodeAnalyser');
-const DataCollector = require('./lambdafunctions/DataCollector');
+const DBServicesProvider = require('./lambdafunctions/DBServicesProvider');
 
 module.exports.CodeAnalysis = async (event) => {
     try {
@@ -17,7 +17,7 @@ module.exports.CodeAnalysis = async (event) => {
 module.exports.DataCollection = async (event) => {
     try {
         const eventMessage = Utils.parseLambdaEvent(event);
-        await Utils.lambdaFunctionExecutor(DataCollector, eventMessage);
+        await Utils.lambdaFunctionExecutor(DBServicesProvider, eventMessage);
     } catch (error) {
         console.error(error);
     }
@@ -26,7 +26,7 @@ module.exports.DataCollection = async (event) => {
 module.exports.ShowResults = async (event) => {
     try {
         const eventMessage = Utils.parseLambdaEvent(event);
-        const result = await DataCollector.getResults(eventMessage.userToken);
+        const result = await DBServicesProvider.getResults(eventMessage.userToken);
         return Utils.httpResponse(200, result?.[0] ?? null);
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
@@ -35,7 +35,7 @@ module.exports.ShowResults = async (event) => {
 
 module.exports.ShowStats = async (event) => {
     try {
-        const result = await DataCollector.getStats();
+        const result = await DBServicesProvider.getStats();
         return Utils.httpResponse(200, result ?? null);
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
@@ -45,7 +45,7 @@ module.exports.ShowStats = async (event) => {
 module.exports.UserFeedback = async (event) => {
     try {
         const eventMessage = Utils.parseLambdaEvent(event);
-        await DataCollector.processFeedback(eventMessage);
+        await DBServicesProvider.processFeedback(eventMessage);
         return Utils.httpResponse(200, { message: 'Thank you!' });
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });

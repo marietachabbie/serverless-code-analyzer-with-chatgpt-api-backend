@@ -1,8 +1,7 @@
-const Utils = require('../utils/Utils');
 const DBConnectionManager = require('../utils/DBConnectionManager');
 const CONSTANTS = require('../utils/Constants');
 
-class DataCollector {
+class DBServicesProvider {
     async execute(event) {
         const { codeData, requestData } = event;
 
@@ -41,4 +40,4 @@ class DataCollector {
     }
 }
 
-module.exports = DataCollector;
+module.exports = DBServicesProvider;

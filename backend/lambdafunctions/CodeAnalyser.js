@@ -81,7 +81,6 @@ class CodeAnalyser {
                 language: this.processedResult.language,
                 request: task,
                 country_code: geoip.lookup(http.sourceIp).country,
-                user_agent: http.userAgent,
             },
         };
     }

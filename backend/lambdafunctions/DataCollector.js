@@ -17,6 +17,23 @@ class DataCollector {
         const query = `select data from code_analyses where user_token = '${token}'`;
         return await dbConnectionManager.query(query);
     }
+
+    static async getStats () {
+        const statistics = {};
+        const dbConnectionManager = new DBConnectionManager();
+        statistics.likeAndOptimise = await dbConnectionManager.query(`select
+                        sum(case when request != 'optimise' then 1 else 0 end) as total,
+                        sum(case when request = 'optimise' then 1 else 0 end) as optimise,
+                        sum(case when does_like then 1 else 0 end) as like
+                        from request_statistics`);
+        statistics.languages = await dbConnectionManager.query(`select
+                        language as lang, count(*) from request_statistics
+                        group by language order by count desc limit 10`);
+        statistics.countries = await dbConnectionManager.query(`select
+                        country_code as country, count(*) from request_statistics
+                        group by country_code order by count desc limit 10`);
+        return statistics;
+    }
 }
 
 module.exports = DataCollector;

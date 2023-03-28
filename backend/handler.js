@@ -31,3 +31,12 @@ module.exports.ShowResults = async (event) => {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
     }
 };
+
+module.exports.ShowStats = async (event) => {
+    try {
+        const result = await DataCollector.getStats();
+        return Utils.httpResponse(200, result ?? null);
+    } catch (err) {
+        return Utils.httpResponse(500, { message: 'Something went wrong!' });
+    }
+};

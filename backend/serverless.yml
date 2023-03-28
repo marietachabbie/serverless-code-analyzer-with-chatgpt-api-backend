@@ -60,3 +60,18 @@ functions:
       - httpApi:
           path: /results
           method: post
+
+  VPCStatisticsPresentation:
+    handler: handler.ShowStats
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - httpApi:
+          path: /stats
+          method: get

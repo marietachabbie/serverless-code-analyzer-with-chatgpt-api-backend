@@ -16,8 +16,7 @@ module.exports.CodeAnalysis = async (event) => {
 
 module.exports.DataCollection = async (event) => {
     try {
-        const eventMessage = Utils.parseLambdaEvent(event);
-        await Utils.lambdaFunctionExecutor(DBServicesProvider, eventMessage);
+        await DBServicesProvider.execute(event, 'collect');
     } catch (error) {
         console.error(error);
     }
@@ -25,8 +24,7 @@ module.exports.DataCollection = async (event) => {
 
 module.exports.ShowResults = async (event) => {
     try {
-        const eventMessage = Utils.parseLambdaEvent(event);
-        const result = await DBServicesProvider.getResults(eventMessage.userToken);
+        const result = await DBServicesProvider.execute(event, 'results');
         return Utils.httpResponse(200, result?.[0] ?? null);
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
@@ -35,7 +33,7 @@ module.exports.ShowResults = async (event) => {
 
 module.exports.ShowStats = async (event) => {
     try {
-        const result = await DBServicesProvider.getStats();
+        const result = await DBServicesProvider.execute(event, 'stats');
         return Utils.httpResponse(200, result ?? null);
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
@@ -44,8 +42,7 @@ module.exports.ShowStats = async (event) => {
 
 module.exports.UserFeedback = async (event) => {
     try {
-        const eventMessage = Utils.parseLambdaEvent(event);
-        await DBServicesProvider.processFeedback(eventMessage);
+        await DBServicesProvider.execute(event, 'feedback');
         return Utils.httpResponse(200, { message: 'Thank you!' });
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });

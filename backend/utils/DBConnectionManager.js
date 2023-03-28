@@ -42,9 +42,9 @@ class DBConnectionManager {
     }
 
     updateMap(table, map, condition, client = this) {
-        const fields = [];
-        const vals = [];
-        let i = 1;
+        const fields = [ 'updated_at = $1' ];
+        const vals = [ new Date() ];
+        let i = 2;
         for (const key in map) {
             fields.push(`${key} = $${i++}`);
             vals.push(map[key]);

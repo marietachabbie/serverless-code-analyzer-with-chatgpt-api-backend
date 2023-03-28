@@ -16,7 +16,8 @@ module.exports.CodeAnalysis = async (event) => {
 
 module.exports.DataCollection = async (event) => {
     try {
-        await Utils.lambdaFunctionExecutor(DataCollector, event);
+        const eventMessage = Utils.parseLambdaEvent(event);
+        await Utils.lambdaFunctionExecutor(DataCollector, eventMessage);
     } catch (error) {
         console.error(error);
     }
@@ -36,6 +37,16 @@ module.exports.ShowStats = async (event) => {
     try {
         const result = await DataCollector.getStats();
         return Utils.httpResponse(200, result ?? null);
+    } catch (err) {
+        return Utils.httpResponse(500, { message: 'Something went wrong!' });
+    }
+};
+
+module.exports.UserFeedback = async (event) => {
+    try {
+        const eventMessage = Utils.parseLambdaEvent(event);
+        await DataCollector.processFeedback(eventMessage);
+        return Utils.httpResponse(200, { message: 'Thank you!' });
     } catch (err) {
         return Utils.httpResponse(500, { message: 'Something went wrong!' });
     }

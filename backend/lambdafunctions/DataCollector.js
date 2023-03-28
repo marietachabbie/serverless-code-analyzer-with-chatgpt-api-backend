@@ -4,8 +4,7 @@ const CONSTANTS = require('../utils/Constants');
 
 class DataCollector {
     async execute(event) {
-        const eventMessage = Utils.parseLambdaEvent(event);
-        const { codeData, requestData } = eventMessage;
+        const { codeData, requestData } = event;
 
         const dbConnectionManager = new DBConnectionManager();
         await dbConnectionManager.insertMap(CONSTANTS.CODE_ANALYSES_TABLE, codeData);
@@ -33,6 +32,12 @@ class DataCollector {
                         country_code as country, count(*) from request_statistics
                         group by country_code order by count desc limit 10`);
         return statistics;
+    }
+
+    static async processFeedback (event) {
+        const { userToken, ...updateData } = event;
+        const dbConnectionManager = new DBConnectionManager();
+        await dbConnectionManager.updateMap(CONSTANTS.REQUEST_STATISTICS_TABLE, updateData, `user_token = '${userToken}'`);
     }
 }
 

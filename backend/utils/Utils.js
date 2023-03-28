@@ -9,13 +9,6 @@ module.exports.setupEnvironment = (env) => {
     }
 };
 
-module.exports.lambdaFunctionExecutor = async (lambda, event) => {
-    const start = Date.now();
-    const instance = new lambda();
-    await instance.execute(event);
-    console.log(`${lambda.name} execution done. It took ${Date.now() - start} miliseconds`);
-};
-
 module.exports.parseHttpEvent = (event, param) => {
     const httpData = event.requestContext.http;
     if (!event.body) {

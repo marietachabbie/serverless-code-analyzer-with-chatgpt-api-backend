@@ -3,7 +3,7 @@ const geoip = require('geoip-lite');
 
 const Utils = require('../utils/Utils');
 const CONSTANTS = require('../utils/Constants');
-const DataCollector = require('./DataCollector');
+const DBServicesProvider = require('./DBServicesProvider');
 
 class CodeAnalyser {
     async execute(event) {
@@ -24,7 +24,7 @@ class CodeAnalyser {
         }
         const dataForDb = this.generateCompleteDataForDb(httpData, body.userToken, task);
         if (process.env.local_execution) {
-            return await Utils.lambdaFunctionExecutor(DataCollector, dataForDb);
+            return await DBServicesProvider.execute(dataForDb, 'collect');
         }
         await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, dataForDb);
     }

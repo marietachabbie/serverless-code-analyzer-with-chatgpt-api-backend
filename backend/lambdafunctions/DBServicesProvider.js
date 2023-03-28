@@ -16,7 +16,7 @@ class DBServicesProvider {
                 break;
             case 'collect':
             default:
-                await this.collectData(event);
+                await this.collectData(eventMessage);
         }
     }
 

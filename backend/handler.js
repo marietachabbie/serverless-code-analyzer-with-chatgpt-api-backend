@@ -6,7 +6,8 @@ const DBServicesProvider = require('./lambdafunctions/DBServicesProvider');
 
 module.exports.CodeAnalysis = async (event) => {
     try {
-        await Utils.lambdaFunctionExecutor(CodeAnalyser, event);
+        const instance = new CodeAnalyser();
+        await instance.execute(event);
         return Utils.httpResponse(200, { message: 'Successfully processed!' });
     } catch (error) {
         console.error(error);

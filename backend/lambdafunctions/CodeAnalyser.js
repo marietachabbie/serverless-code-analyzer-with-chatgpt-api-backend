@@ -146,15 +146,22 @@ class CodeAnalyser {
             this.orderedArray[CONSTANTS[`${complexity}_${CONSTANTS.INDEX}`.toUpperCase()]].trim();
 
         const complexityPunctuationRegex = /[!"#$%&'*,.:;<=>?@[\]_`{|}~]$/g;
-        const complexityRegex = /^O\(.*\)$/i;
+        const complexityRegex = /^O\(.*$/i;
         let isConstant = false;
 
         /* Find the complexity in sentence by looking for a word
-        that starts with O and contains parenthesis */
+        that starts with O and opening parenthesis and either it or the next
+        word ends with closing parenthesis */
         const splitted = this.processedResult[`${complexity}_${CONSTANTS.DETAILS}`].split(' ');
-        splitted.forEach(word => {
-            if (complexityRegex.test(word.replace(complexityPunctuationRegex, ''))) {
-                this.processedResult[`${complexity}`] = word.replace(complexityPunctuationRegex, '').trim();
+        splitted.forEach((word, i) => {
+            const currentWord = word.replace(complexityPunctuationRegex, '');
+            const nextWord = splitted[i + 1]?.replace(complexityPunctuationRegex, '') ?? '';
+            if (complexityRegex.test(currentWord)) {
+                if (nextWord.endsWith(')')) {
+                    this.processedResult[`${complexity}`] = (currentWord + ' ' + nextWord).trim();
+                } else if (currentWord.endsWith(')')) {
+                    this.processedResult[`${complexity}`] = currentWord.trim();
+                }
             } else if (word === 'constant') {
                 isConstant = true;
             }

@@ -2,6 +2,11 @@ const configLoader = require('node-yaml-config');
 const fs = require('fs');
 const AWS = require('aws-sdk');
 
+/**
+ *
+ * @param {string} env
+ * @returns
+ */
 module.exports.setupEnvironment = (env) => {
     const content = configLoader.load('./env.yml', env);
     for (let key in content) {
@@ -9,6 +14,12 @@ module.exports.setupEnvironment = (env) => {
     }
 };
 
+/**
+ *
+ * @param {object} event
+ * @param {string} param
+ * @returns {Array<object>}
+ */
 module.exports.parseHttpEvent = (event, param) => {
     const httpData = event.requestContext.http;
     if (!event.body) {
@@ -19,6 +30,12 @@ module.exports.parseHttpEvent = (event, param) => {
     return [ body, httpData ];
 };
 
+/**
+ *
+ * @param {object} event
+ * @param {string} param
+ * @returns {object | any}
+ */
 module.exports.parseLambdaEvent = (event, param) => {
     try {
         let result = event;
@@ -39,6 +56,12 @@ module.exports.parseLambdaEvent = (event, param) => {
     }
 };
 
+/**
+ *
+ * @param {number} code
+ * @param {object} message
+ * @returns {{statusCode: number, body: string}}
+ */
 module.exports.httpResponse = (code, message) => {
     return {
         statusCode: code,
@@ -46,15 +69,12 @@ module.exports.httpResponse = (code, message) => {
     };
 };
 
-module.exports.readFromFile = async (path) => {
-    return new Promise((resolve, reject) => {
-        fs.readFile(path, (err, data) => {
-            if (err) { reject(err); }
-            resolve(JSON.parse(data));
-        });
-    });
-};
-
+/**
+ *
+ * @param {string} snsName
+ * @param {object} message
+ * @returns
+ */
 module.exports.snsPublish = async (snsName, message) => {
     let sns = new AWS.SNS({
         region: process.env.REGION,

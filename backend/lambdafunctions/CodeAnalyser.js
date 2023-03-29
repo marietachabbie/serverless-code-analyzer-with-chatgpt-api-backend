@@ -6,6 +6,11 @@ const CONSTANTS = require('../utils/Constants');
 const DBServicesProvider = require('./DBServicesProvider');
 
 class CodeAnalyser {
+    /**
+     *
+     * @param {object} event
+     * @returns
+     */
     async execute(event) {
         const [ body, httpData ] = Utils.parseHttpEvent(event);
         if (!body.code) {
@@ -22,13 +27,19 @@ class CodeAnalyser {
         } else {
             this.generateCodeOptimisationData(response);
         }
-        const dataForDb = this.generateCompleteDataForDb(httpData, body.userToken, task);
+        const dataForDb = this.generateCompleteDataForDb(httpData.sourceIp, body.userToken, task);
         if (process.env.local_execution) {
             return await DBServicesProvider.execute(dataForDb, 'collect');
         }
         await Utils.snsPublish(process.env.DATA_COLLECTOR_SNS, dataForDb);
     }
 
+    /**
+     *
+     * @param {string} code
+     * @param {string} task
+     * @returns {string}
+     */
     generateQuestion(code, task) {
         let question = 'Tell me ';
         switch (task) {
@@ -45,6 +56,10 @@ class CodeAnalyser {
         return question + '\n' + code;
     }
 
+    /**
+     *
+     * @param {string} message
+     */
     generateCodeOptimisationData (message) {
         const splitted = message.split('\n');
         this.orderedArray[CONSTANTS.LANGUAGE_INDEX] = splitted.shift();
@@ -52,6 +67,10 @@ class CodeAnalyser {
         this.processedResult.result = splitted.join('\n');
     }
 
+    /**
+     *
+     * @param {string} message
+     */
     generateCodeAnalysisData (message) {
         /* Split the respone by lines and order them in an array
         by corresponding indices (e.g. 1 for language) */
@@ -70,7 +89,14 @@ class CodeAnalyser {
         this.assignComplexity(CONSTANTS.SPACE);
     }
 
-    generateCompleteDataForDb(http, token, task) {
+    /**
+     *
+     * @param {string} ip
+     * @param {string} token
+     * @param {string} task
+     * @returns
+     */
+    generateCompleteDataForDb(ip, token, task) {
         return {
             codeData: {
                 user_token: token,
@@ -80,7 +106,7 @@ class CodeAnalyser {
                 user_token: token,
                 language: this.processedResult.language,
                 request: task,
-                country_code: geoip.lookup(http.sourceIp).country,
+                country_code: geoip.lookup(ip).country,
             },
         };
     }
@@ -138,6 +164,10 @@ class CodeAnalyser {
         });
     }
 
+    /**
+     *
+     * @param {string} option
+     */
     assignComplexity(option) {
         /* Assign the whole sentence about complexity to processedResult
         from the ordered array by its index */
@@ -174,6 +204,11 @@ class CodeAnalyser {
         }
     }
 
+    /**
+     *
+     * @param {string} content
+     * @returns
+     */
     async requestDataFromChatgptAPI (content) {
         const role = process.env.OPENAI_USER;
         const configuration = new Configuration({

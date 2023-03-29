@@ -15,6 +15,12 @@ class DBConnectionManager {
         });
     }
 
+    /**
+     *
+     * @param {string} sql
+     * @param {Array} values
+     * @returns {Promise<Array<object>>}
+     */
     query(sql, values) {
         return new Promise((resolve, reject) => {
             this.dbConnectionsPool.query(sql, values)
@@ -27,6 +33,13 @@ class DBConnectionManager {
         });
     }
 
+    /**
+     *
+     * @param {string} table
+     * @param {object} map
+     * @param {DBConnectionManager} client
+     * @returns {Promise<Array<object>>}
+     */
     insertMap(table, map, client = this) {
         const fields = [ 'created_at' ];
         const vals = [ new Date() ];
@@ -41,6 +54,14 @@ class DBConnectionManager {
         return client.query(query, vals);
     }
 
+    /**
+     *
+     * @param {string} table
+     * @param {object} map
+     * @param {string} condition
+     * @param {DBConnectionManager} client
+     * @returns {Promise<Array<object>>}
+     */
     updateMap(table, map, condition, client = this) {
         const fields = [ 'updated_at = $1' ];
         const vals = [ new Date() ];

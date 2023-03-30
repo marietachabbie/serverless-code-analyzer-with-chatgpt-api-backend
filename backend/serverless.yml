@@ -1,0 +1,92 @@
+service: code-analyzer
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  timeout: 900
+  region: ${self:provider.environment.REGION}
+  stage: dev
+  environment: ${file(env.yml):${self:provider.stage}}
+
+functions:
+  NETCodeAnalysis:
+    handler: handler.CodeAnalysis
+    memorySize: 256
+    events:
+      - httpApi:
+          path: /analyse
+          method: post
+
+  NETCodeOptimisation:
+    handler: handler.CodeAnalysis
+    memorySize: 256
+    events:
+      - httpApi:
+          path: /optimise
+          method: post
+
+  NETCodeComment:
+    handler: handler.CodeAnalysis
+    memorySize: 256
+    events:
+      - httpApi:
+          path: /comment
+          method: post
+
+  VPCDataCollection:
+    handler: handler.DataCollection
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - sns: ${self:provider.environment.DATA_COLLECTOR_SNS}
+
+  VPCResultsPresentation:
+    handler: handler.ShowResults
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - httpApi:
+          path: /results
+          method: post
+
+  VPCStatisticsPresentation:
+    handler: handler.ShowStats
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - httpApi:
+          path: /stats
+          method: get
+
+  VPCUserFeedback:
+    handler: handler.UserFeedback
+    memorySize: 256
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+        - ${self:provider.environment.SUBNET_ID_3}
+    events:
+      - httpApi:
+          path: /feedback
+          method: post

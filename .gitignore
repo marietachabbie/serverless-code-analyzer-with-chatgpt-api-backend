@@ -1,3 +1,13 @@
+# dependencies
+node_modules
+package-lock.json
+
+# serverless directories
+.serverless
+
+# environment variables
+env.yml
+
 # workspace files
 todo.vsorg
 serverless-code-analyzer-with-chatgpt-apis.code-workspace

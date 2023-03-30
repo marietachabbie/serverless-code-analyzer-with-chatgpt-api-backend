@@ -1,3 +1,6 @@
 # workspace files
 todo.vsorg
 serverless-code-analyzer-with-chatgpt-apis.code-workspace
+requests.http
+LocalExecutor.js
+.vscode/

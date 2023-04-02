@@ -1,5 +1,4 @@
 const configLoader = require('node-yaml-config');
-const fs = require('fs');
 const AWS = require('aws-sdk');
 
 /**
@@ -65,6 +64,11 @@ module.exports.parseLambdaEvent = (event, param) => {
 module.exports.httpResponse = (code, message) => {
     return {
         statusCode: code,
+        headers: {
+            'Access-Control-Allow-Headers': 'X-Requested-With,content-type,accept-version,Access-Control-Allow-Origin',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,GET',
+        },
         body: JSON.stringify(message),
     };
 };
